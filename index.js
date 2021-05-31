@@ -6,6 +6,7 @@ import https from 'https';
 import appRootPath from 'app-root-path';
 import git from 'simple-git';
 import Logger from 'chegs-simple-logger';
+import { execSync } from 'node:child_process';
 
 /** 
  * @typedef Config - Configuration for Auto Git Update
@@ -14,9 +15,12 @@ import Logger from 'chegs-simple-logger';
  * @param {String} token - A personal access token used for accessions private repositories. 
  * @param {String} tempLocation - The local dir to save temporary information for Auto Git Update.
  * @param {Array[String]} ignoreFiles - An array of files to not install when updating. Useful for config files. 
+ * @param {Boolean} typescriptCompiler - For projects made with TypeScript.
  * @param {String} executeOnComplete - A command to execute after an update completes. Good for restarting the app.
  * @param {Boolean} exitOnComplete - Use process exit to stop the app after a successful update.
- */let config = {}
+ */
+
+let config = {}
 
 // Subdirectories to use within the configured tempLocation from above. 
 const cloneSubdirectory = '/AutoGitUpdate/repo/';
@@ -85,7 +89,7 @@ export default class AutoGitUpdate {
             log.general('Auto Git Update - Remote Version: ' + remoteVersion);
             if (currentVersion == remoteVersion) return {upToDate: true, currentVersion};
             return {upToDate: false, currentVersion, remoteVersion};
-        }catch(err) {
+        } catch(err) {
             log.error('Auto Git Update - Error comparing local and remote versions.');
             log.error(err);
             return {upToDate: false, currentVersion: 'Error', remoteVersion: 'Error'}
@@ -105,6 +109,7 @@ export default class AutoGitUpdate {
             await backupApp();
             await installUpdate();
             await installDependencies();
+            if(config.typescriptCompiler) await compile();
             log.general('Auto Git Update - Finished installing updated version.');
             if (config.executeOnComplete) await promiseBlindExecute(config.executeOnComplete);
             if (config.exitOnComplete) process.exit(1);
@@ -132,6 +137,23 @@ export default class AutoGitUpdate {
 // AUTO GIT UPDATE FUNCTIONS 
 
 /**
+ * Compile typescript files to javascript files.
+ */
+async function compile() {
+    try {
+        log.general('Auto Git Update - Compiling TypeScript files');
+        execSync('npx tsc');
+    } catch (err) {
+        log.error('Auto Git Update - Unable to compile TypeScript');
+        log.error(err);
+
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Creates a backup of the application, including node modules. 
  * The backup is stored in the configured tempLocation. Only one backup is kept at a time. 
  */
@@ -139,7 +161,8 @@ async function backupApp() {
     let destination = path.join(config.tempLocation, backupSubdirectory);
     log.detail('Auto Git Update - Backing up app to ' + destination);
     await fs.ensureDir(destination);
-    await fs.copy(appRootPath.path, destination);
+    const folders = fs.readdirSync(appRootPath.path);
+    folders.forEach(async folder => await fs.copy(`${appRootPath.path}/${folder}`, destination));
     return true;
 }
 
