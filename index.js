@@ -1,12 +1,11 @@
 
-import path from 'path';
-import fs from 'fs-extra';
-import {spawn, exec} from 'child_process';
-import https from 'https';
-import appRootPath from 'app-root-path';
-import git from 'simple-git';
-import Logger from 'chegs-simple-logger';
-import { execSync } from 'node:child_process';
+const path = require('path');
+const fs = require('fs-extra');
+const {spawn, exec, execSync} = require('child_process');
+const https = require('https');
+const appRootPath = require('app-root-path');
+const git = require('simple-git');
+const Logger = require('chegs-simple-logger');
 
 /** 
  * @typedef Config - Configuration for Auto Git Update
@@ -38,7 +37,7 @@ log.logError   = true;
 log.logDetail  = false;
 log.logDebug   = false;
 
-export default class AutoGitUpdate {
+module.exports = class AutoGitUpdate {
     /**
      * Creates an object which can be used to automatically update an application from a remote git repository. 
      * @param {Config} updateConfig 
