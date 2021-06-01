@@ -4,7 +4,6 @@
   "description": "Update node app from git repo.",
   "keywords": ["auto", "automatic", "git", "github", "update", "updater"],
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
