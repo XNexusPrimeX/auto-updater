@@ -105,7 +105,7 @@ module.exports = class AutoGitUpdate {
         try {
             log.general('Auto Git Update - Updating application from ' + config.repository);
             await downloadUpdate();
-            await backupApp();
+//             await backupApp();
             await installUpdate();
             await installDependencies();
             if(config.typescriptCompiler) await compile();
