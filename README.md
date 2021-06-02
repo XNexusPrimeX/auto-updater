@@ -71,3 +71,5 @@ const updater = new AutoGitUpdate(config);
 
 updater.autoUpdate();
 ```
+
+_The original package is this: https://www.npmjs.com/package/auto-git-update, I cloned because it was giving errors
